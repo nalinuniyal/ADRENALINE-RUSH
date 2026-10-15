@@ -1,0 +1,6 @@
+*.log
+keys.env
+proxy.pid
+postgrest.conf
+smtp-*.pem
+mail.jsonl

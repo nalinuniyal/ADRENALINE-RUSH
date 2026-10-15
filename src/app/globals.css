@@ -1,0 +1,200 @@
+@import "tailwindcss";
+
+/*
+ * Adrenaline Rush design tokens: Lightning-inspired.
+ * Palette follows the familiar Salesforce Lightning feel (cloud blue brand,
+ * deep navy, neutral greys, clear status colours) without using any
+ * Salesforce logos or proprietary fonts.
+ */
+@theme {
+  --font-sans: var(--font-inter), "Salesforce Sans", -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-display: var(--font-space), var(--font-inter), system-ui, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  /* Navy scale (headers, hero, dark surfaces) */
+  --color-ink-950: #001639;
+  --color-ink-900: #032d60;
+  --color-ink-800: #0b3a75;
+  --color-ink-700: #014486;
+  --color-ink-600: #0b5cab;
+
+  /* Brand blue scale */
+  --color-brand-50: #eef4ff;
+  --color-brand-100: #d8e6fe;
+  --color-brand-200: #aacbff;
+  --color-brand-300: #78b0fd;
+  --color-brand-400: #1b96ff;
+  --color-brand-500: #0b8bf0;
+  --color-brand-600: #0176d3;
+  --color-brand-700: #014486;
+  --color-brand-800: #032d60;
+
+  /* Accents */
+  --color-volt-400: #57e3ff;
+  --color-volt-500: #1ab9ff;
+  --color-violet-500: #9050e9;
+  --color-teal-500: #06a59a;
+  --color-orange-500: #fe9339;
+  --color-pink-500: #e3066a;
+
+  /* Neutrals */
+  --color-surface: #ffffff;
+  --color-canvas: #f3f3f3;
+  --color-line: #e5e5e5;
+  --color-line-strong: #c9c9c9;
+  --color-muted: #5c5c5c;
+  --color-fg: #181818;
+
+  /* Status */
+  --color-success-50: #ebf7e6;
+  --color-success-500: #45c65a;
+  --color-success-700: #2e844a;
+  --color-warning-50: #fef1e6;
+  --color-warning-500: #fe9339;
+  --color-warning-700: #a96404;
+  --color-danger-50: #fef1ee;
+  --color-danger-600: #ea001e;
+  --color-danger-700: #ba0517;
+
+  --radius-card: 0.5rem;
+
+  --shadow-card: 0 2px 2px 0 rgb(0 0 0 / 0.08);
+  --shadow-raised: 0 4px 14px -2px rgb(3 45 96 / 0.16);
+  --shadow-glow: 0 0 0 1px rgb(27 150 255 / 0.25), 0 10px 40px -10px rgb(27 150 255 / 0.55);
+
+  --animate-fade-in: fade-in 220ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  --animate-fade-up: fade-up 520ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  --animate-scale-in: scale-in 200ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  --animate-slide-in-left: slide-in-left 260ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  --animate-aurora: aurora 18s ease-in-out infinite alternate;
+  --animate-float: float 7s ease-in-out infinite;
+  --animate-shimmer: shimmer 2.2s linear infinite;
+  --animate-grid-pan: grid-pan 22s linear infinite;
+  --animate-gradient-x: gradient-x 8s ease infinite;
+  --animate-pulse-ring: pulse-ring 2.4s cubic-bezier(0.2, 0.8, 0.2, 1) infinite;
+
+  @keyframes fade-in {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: none; }
+  }
+  @keyframes fade-up {
+    from { opacity: 0; transform: translateY(18px); filter: blur(4px); }
+    to { opacity: 1; transform: none; filter: blur(0); }
+  }
+  @keyframes scale-in {
+    from { opacity: 0; transform: scale(0.96); }
+    to { opacity: 1; transform: none; }
+  }
+  @keyframes slide-in-left {
+    from { opacity: 0; transform: translateX(-24px); }
+    to { opacity: 1; transform: none; }
+  }
+  @keyframes aurora {
+    0% { transform: translate3d(0, 0, 0) rotate(0deg) scale(1); }
+    50% { transform: translate3d(6%, -4%, 0) rotate(12deg) scale(1.08); }
+    100% { transform: translate3d(-4%, 5%, 0) rotate(-8deg) scale(0.96); }
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-12px); }
+  }
+  @keyframes shimmer {
+    from { background-position: -200% 0; }
+    to { background-position: 200% 0; }
+  }
+  @keyframes grid-pan {
+    from { background-position: 0 0; }
+    to { background-position: 0 64px; }
+  }
+  @keyframes gradient-x {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+  @keyframes pulse-ring {
+    0% { box-shadow: 0 0 0 0 rgb(27 150 255 / 0.5); }
+    80%, 100% { box-shadow: 0 0 0 14px rgb(27 150 255 / 0); }
+  }
+}
+
+@layer base {
+  html { color-scheme: light; scroll-behavior: smooth; }
+  body {
+    background: var(--color-canvas);
+    color: var(--color-fg);
+    font-family: var(--font-sans);
+    font-size: 0.875rem;
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-brand-600);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+  ::selection { background: rgb(27 150 255 / 0.25); }
+}
+
+@layer components {
+  /* Lightning-style page backdrop: navy-to-sky band behind the content */
+  .ar-backdrop {
+    background:
+      radial-gradient(1200px 300px at 10% -40px, rgb(27 150 255 / 0.28), transparent 70%),
+      radial-gradient(900px 260px at 90% -60px, rgb(144 80 233 / 0.16), transparent 70%),
+      linear-gradient(180deg, #cfe9fe 0, #eaf5fe 160px, var(--color-canvas) 320px);
+  }
+  .ar-grid-bg {
+    background-image:
+      linear-gradient(rgb(255 255 255 / 0.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgb(255 255 255 / 0.06) 1px, transparent 1px);
+    background-size: 64px 64px;
+  }
+  .ar-glass {
+    background: rgb(255 255 255 / 0.08);
+    border: 1px solid rgb(255 255 255 / 0.16);
+    backdrop-filter: blur(14px) saturate(140%);
+    -webkit-backdrop-filter: blur(14px) saturate(140%);
+  }
+  .ar-text-gradient {
+    background: linear-gradient(90deg, #ffffff 0%, #aacbff 30%, #57e3ff 55%, #c9a7ff 80%, #ffffff 100%);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: var(--animate-gradient-x);
+  }
+  .ar-skeleton {
+    background: linear-gradient(90deg, #ececec 25%, #f7f7f7 37%, #ececec 63%);
+    background-size: 400% 100%;
+    animation: var(--animate-shimmer);
+  }
+  /* Card that lights up under the pointer (see components/fx/spotlight.tsx) */
+  .ar-spotlight { position: relative; isolation: isolate; }
+  .ar-spotlight::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 200ms;
+    background: radial-gradient(420px circle at var(--mx, 50%) var(--my, 50%), rgb(27 150 255 / 0.14), transparent 45%);
+    z-index: -1;
+  }
+  .ar-spotlight:hover::before { opacity: 1; }
+  .ar-lift { transition: transform 220ms cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 220ms; }
+  .ar-lift:hover { transform: translateY(-3px); box-shadow: var(--shadow-raised); }
+
+  /* Scroll reveal (see components/fx/reveal.tsx) */
+  /* Hidden only once JS marks it pending, so content stays visible without JS. */
+  [data-reveal] { transition: opacity 700ms cubic-bezier(0.2, 0.8, 0.2, 1), transform 700ms cubic-bezier(0.2, 0.8, 0.2, 1); transition-delay: var(--reveal-delay, 0ms); }
+  [data-reveal="pending"] { opacity: 0; transform: translateY(22px); }
+  [data-reveal="shown"] { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  [data-reveal] { opacity: 1; transform: none; }
+}
