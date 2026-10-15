@@ -45,7 +45,7 @@
     "@types/react-dom": "^19",
     "@vitest/coverage-v8": "^5.0.4",
     "eslint": "^9",
-    "eslint-config-next": "16.4.0",
+    "eslint-config-next": "^14.2.35",
     "pg": "^8.23.1",
     "prettier": "^3.9.10",
     "supabase": "^2.120.0",

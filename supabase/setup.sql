@@ -10,7 +10,7 @@
 -- newer setup.sql the same way to apply the changes. Existing data is kept.
 --
 -- Generated from supabase/migrations by `npm run db:setup-sql`. Do not edit by hand.
--- Contains: 20261014000001_foundation.sql, 20261014000002_rate_limits.sql, 20261014000003_courses_candidates.sql, 20261014000004_crm_import.sql, 20261014000005_course_content.sql, 20261014000006_email.sql, 20261014000007_shorter_registration_form.sql, 20261014000008_team_invitations.sql, 20261014000009_demos_resources.sql, 20261014000010_batches_sessions.sql, 20261014000011_finance.sql, 20261014000012_analytics.sql, 20261014000013_upi_payments.sql, 20261014000014_custom_roles.sql
+-- Contains: 20261014000001_foundation.sql, 20261014000002_rate_limits.sql, 20261014000003_courses_candidates.sql, 20261014000004_crm_import.sql, 20261014000005_course_content.sql, 20261014000006_email.sql, 20261014000007_shorter_registration_form.sql, 20261014000008_team_invitations.sql, 20261014000009_demos_resources.sql, 20261014000010_batches_sessions.sql, 20261014000011_finance.sql, 20261014000012_analytics.sql, 20261014000013_upi_payments.sql, 20261014000014_custom_roles.sql, 20261014000015_course_cover_paths.sql
 -- =============================================================================
 
 -- >>>>>>>>>>>>>>>>>>>> 20261014000001_foundation.sql
@@ -8216,3 +8216,21 @@ grant execute on function public.delete_custom_role(uuid) to authenticated, serv
 grant execute on function public.set_builtin_role_permissions(uuid, public.member_role, text[]) to authenticated, service_role;
 grant execute on function public.reset_builtin_role_permissions(uuid, public.member_role) to authenticated, service_role;
 grant execute on function public.accept_team_invitation(text, uuid, text) to service_role;
+
+
+-- >>>>>>>>>>>>>>>>>>>> 20261014000015_course_cover_paths.sql
+
+-- =============================================================================
+-- Adrenaline Rush: built-in course covers
+--   Course covers may now also point at the images shipped with the site in
+--   public/covers (for example /covers/html-css.svg), so a course has a good
+--   cover without hosting an image elsewhere. Any other value must still be a
+--   full https:// link.
+-- =============================================================================
+
+alter table public.courses drop constraint if exists courses_cover_image_url_check;
+alter table public.courses add constraint courses_cover_image_url_check check (
+  cover_image_url is null
+  or cover_image_url ~* '^https://'
+  or cover_image_url ~ '^/covers/[A-Za-z0-9_-][A-Za-z0-9._-]*\.(svg|png|jpg|jpeg|webp)$'
+);

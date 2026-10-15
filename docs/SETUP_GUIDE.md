@@ -166,6 +166,19 @@ its link. Demo emails work for every course automatically.
 Data Cloud, HTML & CSS) with categories, What's included, FAQs and a curriculum. Paste it in the SQL Editor
 and Run. Re-running skips courses that already exist, so your edits are kept.
 
+### Full HTML & CSS and Marketing Cloud Next courses
+
+`supabase/starter/html-css-and-mc-next.sql` creates (or refreshes) two complete courses built like MCP:
+**HTML & CSS for Marketers and Marketing Cloud** (`/courses/html-css`) and **Salesforce Marketing Cloud Next**
+(`/courses/marketing-cloud-next`), each with a detailed overview, 14 modules with lesson durations, outcomes,
+FAQs, What's included and a cover image. It also gives MCP its cover if it has none. Run the latest
+`supabase/setup.sql` first, then paste the file in the SQL Editor and Run. Re-running updates the text and
+curriculum but keeps each course's status, prices, schedule and registrations.
+
+**Cover images.** Three covers ship with the website: `/covers/mcp.svg`, `/covers/html-css.svg` and
+`/covers/marketing-cloud-next.svg`. Put one of those, or any full `https://` image link, in Admin → Courses →
+Edit → Cover image URL. The cover shows on course cards, the home page and the top of the course page.
+
 To edit directly in Supabase: **Table Editor → `courses`**, double-click a cell, change it, **Save**. Changes
 show on the website straight away.
 
@@ -178,6 +191,7 @@ show on the website straight away.
 | `learning_outcomes` | "What you'll learn" list | `{"First point","Second point"}` |
 | `inclusions` | What's included cards | `[{"title":"Interview practice","description":"...","icon":"mic"}]` |
 | `faqs` | Questions and answers | `[{"q":"Question?","a":"Answer."}]` |
+| `cover_image_url` | Course picture | `/covers/html-css.svg` or a full `https://` image link |
 | `slug` | The link, `/courses/<slug>` | lowercase-with-dashes; changing it breaks links you already shared |
 
 Curriculum is in `course_modules` (one row per module, ordered by `position`) and `lessons` (linked by

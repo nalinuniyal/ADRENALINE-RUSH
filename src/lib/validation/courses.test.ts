@@ -85,6 +85,8 @@ describe("courseSchema", () => {
     ["double hyphen slug", { slug: "a--b" }, "slug"],
     ["short title", { title: "ab" }, "title"],
     ["http cover image", { coverImageUrl: "http://example.test/a.png" }, "coverImageUrl"],
+    ["cover outside /covers", { coverImageUrl: "/admin/x.svg" }, "coverImageUrl"],
+    ["cover path traversal", { coverImageUrl: "/covers/../x.svg" }, "coverImageUrl"],
     ["non-url demo", { demoUrl: "javascript:alert(1)" }, "demoUrl"],
     ["negative price", { listPrice: "-1" }, "listPrice"],
     ["three decimals", { listPrice: "1.234" }, "listPrice"],
@@ -99,6 +101,11 @@ describe("courseSchema", () => {
     const r = courseSchema.safeParse({ ...validCourse, ...patch });
     expect(r.success).toBe(false);
     expect(errorsOf(r)).toContain(path);
+  });
+
+  it.each(["/covers/html-css.svg", "https://images.example.com/a.png"])("accepts cover %s", (cover) => {
+    const r = courseSchema.safeParse({ ...validCourse, coverImageUrl: cover });
+    expect(r.success && r.data.coverImageUrl).toBe(cover);
   });
 
   it("rejects a discounted price above the list price", () => {

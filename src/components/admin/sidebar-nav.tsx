@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { Grip, X } from "lucide-react";
 import { Logo } from "@/components/brand/logo";
 import { NAV_COLORS, NAV_ICONS } from "@/components/admin/nav-icons";
@@ -77,7 +78,9 @@ export function AppLauncher({ items }: { items: NavItem[] }) {
       >
         <Grip className="size-5" aria-hidden />
       </button>
-      {open ? (
+      {/* Portal to <body>: the header's backdrop blur would otherwise trap this fixed panel inside the header. */}
+      {open
+        ? createPortal(
         <div className="fixed inset-0 z-50" role="dialog" aria-modal="true" aria-label="App launcher" id="app-launcher">
           <button type="button" className="absolute inset-0 bg-ink-950/50 backdrop-blur-sm animate-fade-in" aria-label="Close" onClick={() => setOpen(false)} />
           <div className="relative flex h-full w-80 max-w-[88vw] flex-col bg-surface shadow-2xl animate-slide-in-left">
@@ -112,8 +115,10 @@ export function AppLauncher({ items }: { items: NavItem[] }) {
               </ul>
             </nav>
           </div>
-        </div>
-      ) : null}
+        </div>,
+            document.body,
+          )
+        : null}
     </>
   );
 }

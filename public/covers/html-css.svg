@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img" aria-label="HTML and CSS course cover">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#021a3a"/><stop offset=".55" stop-color="#014486"/><stop offset="1" stop-color="#9050e9"/>
+    </linearGradient>
+    <radialGradient id="glow" cx=".78" cy=".35" r=".55">
+      <stop offset="0" stop-color="#57e3ff" stop-opacity=".45"/><stop offset="1" stop-color="#57e3ff" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="grid" width="48" height="48" patternUnits="userSpaceOnUse">
+      <path d="M48 0H0V48" fill="none" stroke="#ffffff" stroke-opacity=".06" stroke-width="1"/>
+    </pattern>
+    <filter id="sh" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="24" stdDeviation="28" flood-color="#000" flood-opacity=".35"/></filter>
+  </defs>
+  <rect width="1600" height="900" fill="url(#bg)"/>
+  <rect width="1600" height="900" fill="url(#grid)"/>
+  <rect width="1600" height="900" fill="url(#glow)"/>
+
+  <g font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif" fill="#fff">
+    <text x="110" y="300" font-size="30" font-weight="700" letter-spacing="6" fill="#57e3ff">WEB FOUNDATIONS</text>
+    <text x="110" y="410" font-size="112" font-weight="800">HTML &amp; CSS</text>
+    <text x="110" y="480" font-size="38" fill="#ffffff" fill-opacity=".8">Build responsive, accessible pages</text>
+    <text x="110" y="530" font-size="38" fill="#ffffff" fill-opacity=".8">and email-ready layouts from scratch</text>
+    <g font-size="26" font-weight="600">
+      <rect x="110" y="590" width="170" height="54" rx="27" fill="#ffffff" fill-opacity=".12"/><text x="195" y="626" text-anchor="middle">Flexbox</text>
+      <rect x="296" y="590" width="130" height="54" rx="27" fill="#ffffff" fill-opacity=".12"/><text x="361" y="626" text-anchor="middle">Grid</text>
+      <rect x="442" y="590" width="210" height="54" rx="27" fill="#ffffff" fill-opacity=".12"/><text x="547" y="626" text-anchor="middle">Responsive</text>
+    </g>
+  </g>
+
+  <g transform="translate(930 190)" filter="url(#sh)">
+    <rect width="560" height="420" rx="22" fill="#0b1630"/>
+    <rect width="560" height="54" rx="22" fill="#14254a"/><rect y="30" width="560" height="24" fill="#14254a"/>
+    <circle cx="34" cy="27" r="8" fill="#ff6b6b"/><circle cx="60" cy="27" r="8" fill="#ffd166"/><circle cx="86" cy="27" r="8" fill="#06d6a0"/>
+    <g font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="24">
+      <text x="34" y="110"><tspan fill="#9aa7c7">&lt;</tspan><tspan fill="#57e3ff">section</tspan> <tspan fill="#c792ea">class</tspan><tspan fill="#9aa7c7">=</tspan><tspan fill="#ffd166">"hero"</tspan><tspan fill="#9aa7c7">&gt;</tspan></text>
+      <text x="62" y="152"><tspan fill="#9aa7c7">&lt;</tspan><tspan fill="#57e3ff">h1</tspan><tspan fill="#9aa7c7">&gt;</tspan><tspan fill="#ffffff">Hello, web</tspan><tspan fill="#9aa7c7">&lt;/</tspan><tspan fill="#57e3ff">h1</tspan><tspan fill="#9aa7c7">&gt;</tspan></text>
+      <text x="34" y="194"><tspan fill="#9aa7c7">&lt;/</tspan><tspan fill="#57e3ff">section</tspan><tspan fill="#9aa7c7">&gt;</tspan></text>
+      <text x="34" y="256"><tspan fill="#ffd166">.hero</tspan> <tspan fill="#9aa7c7">{</tspan></text>
+      <text x="62" y="298"><tspan fill="#c792ea">display</tspan><tspan fill="#9aa7c7">:</tspan> <tspan fill="#06d6a0">grid</tspan><tspan fill="#9aa7c7">;</tspan></text>
+      <text x="62" y="340"><tspan fill="#c792ea">gap</tspan><tspan fill="#9aa7c7">:</tspan> <tspan fill="#06d6a0">2rem</tspan><tspan fill="#9aa7c7">;</tspan></text>
+      <text x="34" y="382" fill="#9aa7c7">}</text>
+    </g>
+  </g>
+  <g transform="translate(1310 560)" filter="url(#sh)">
+    <rect width="220" height="200" rx="18" fill="#ffffff"/>
+    <rect x="20" y="20" width="180" height="46" rx="8" fill="#57e3ff"/>
+    <rect x="20" y="80" width="84" height="100" rx="8" fill="#9050e9" fill-opacity=".85"/>
+    <rect x="116" y="80" width="84" height="44" rx="8" fill="#014486" fill-opacity=".85"/>
+    <rect x="116" y="136" width="84" height="44" rx="8" fill="#014486" fill-opacity=".5"/>
+  </g>
+</svg>

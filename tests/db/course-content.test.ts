@@ -253,3 +253,75 @@ describe("MCP starter script", () => {
     }
   });
 });
+
+describe("course covers", () => {
+  it.each(["/covers/html-css.svg", "/covers/a_b-1.webp", "https://cdn.example.test/a.png", null])("accepts %s", async (cover) => {
+    await db.query("update public.courses set cover_image_url = $1 where id = $2", [cover, courseId]);
+  });
+
+  it.each(["http://cdn.example.test/a.png", "/admin/a.svg", "/covers/../a.svg", "/covers/.hidden.svg", "/covers/a.svg?x=1", "javascript:alert(1)"])(
+    "rejects %s",
+    async (cover) => {
+      await expect(db.query("update public.courses set cover_image_url = $1 where id = $2", [cover, courseId])).rejects.toThrow(/cover_image_url_check/);
+    },
+  );
+});
+
+describe("HTML & CSS and Marketing Cloud Next script", () => {
+  const SCRIPT = readFileSync(path.resolve(__dirname, "../../supabase/starter/html-css-and-mc-next.sql"), "utf8");
+  const SAMPLES = readFileSync(path.resolve(__dirname, "../../supabase/starter/sample-courses.sql"), "utf8");
+
+  it("updates the existing html-css course in place, creates marketing-cloud-next and is safe to run twice", async () => {
+    const dbName = `ar_mcnext_${Date.now()}`;
+    const admin = new Client({ connectionString: adminUrl });
+    await admin.connect();
+    await admin.query(`create database ${dbName}`);
+    const url = new URL(adminUrl);
+    url.pathname = `/${dbName}`;
+    const c = new Client({ connectionString: url.toString() });
+    await c.connect();
+    try {
+      await c.query(readFileSync(path.join(__dirname, "supabase-stub.sql"), "utf8"));
+      await c.query(readFileSync(path.resolve(__dirname, "../../supabase/setup.sql"), "utf8"));
+
+      // Without an organization it stops with a clear message.
+      await expect(c.query(SCRIPT)).rejects.toThrow(/No organization yet/);
+
+      await seedOrg(c);
+      await c.query(STARTER);
+      await c.query(SAMPLES);
+      const before = (await c.query("select id, status, list_price, discounted_price from public.courses where slug = 'html-css'")).rows[0];
+
+      await c.query(SCRIPT);
+      await c.query(SCRIPT);
+
+      const { rows } = await c.query(
+        `select c.slug, c.id, c.status, c.list_price, c.discounted_price, c.cover_image_url, c.inclusions, c.faqs,
+                (select count(*)::int from public.course_modules m where m.course_id = c.id) as modules,
+                (select count(*)::int from public.lessons l join public.course_modules m on m.id = l.module_id where m.course_id = c.id and l.duration_minutes > 0) as lessons,
+                (select count(*)::int from public.course_registration_fields f where f.course_id = c.id) as fields
+           from public.courses c where c.slug in ('html-css', 'marketing-cloud-next', 'mcp') order by c.slug`,
+      );
+      const [html, mcn, mcp] = rows;
+      expect(html).toMatchObject({ id: before.id, status: before.status, list_price: before.list_price, discounted_price: before.discounted_price });
+      expect(html.cover_image_url).toBe("/covers/html-css.svg");
+      expect(mcn).toMatchObject({ status: "published", list_price: null, cover_image_url: "/covers/marketing-cloud-next.svg" });
+      expect(mcp.cover_image_url).toBe("/covers/mcp.svg");
+      for (const r of [html, mcn]) {
+        expect(r.modules).toBeGreaterThanOrEqual(12);
+        expect(r.lessons).toBeGreaterThanOrEqual(50);
+        expect(r.fields).toBeGreaterThanOrEqual(10);
+        expect(r.inclusions).toHaveLength(5);
+        expect(r.faqs.length).toBeGreaterThanOrEqual(5);
+      }
+
+      const pub = await as(c, { role: "anon" }, (x) => x.query("select public.get_public_course('marketing-cloud-next') as c"));
+      expect(pub.rows[0].c).toMatchObject({ cover_image_url: "/covers/marketing-cloud-next.svg", registration_mode: "demo" });
+      expect(pub.rows[0].c.modules.length).toBeGreaterThanOrEqual(12);
+    } finally {
+      await c.end();
+      await admin.query(`drop database if exists ${dbName} with (force)`);
+      await admin.end();
+    }
+  });
+});

@@ -2,7 +2,7 @@ import "server-only";
 import { cache } from "react";
 import { createSupabasePublicClient } from "@/lib/supabase/public";
 import type { RegistrationField } from "@/lib/forms/registration";
-import { isInclusionIcon, type InclusionIcon, type RegistrationMode } from "@/lib/validation/courses";
+import { isCoverImageUrl, isInclusionIcon, type InclusionIcon, type RegistrationMode } from "@/lib/validation/courses";
 
 export type PublicInclusion = { title: string; description: string | null; icon: InclusionIcon | null };
 
@@ -61,6 +61,7 @@ function readInclusions(value: unknown): PublicInclusion[] {
 function withContent<T extends Record<string, unknown>>(c: T) {
   return {
     ...c,
+    cover_image_url: isCoverImageUrl(c.cover_image_url) ? c.cover_image_url : null,
     inclusions: readInclusions(c.inclusions),
     registration_mode: c.registration_mode === "interest" ? "interest" : "demo",
     cta_label: typeof c.cta_label === "string" && c.cta_label.trim() ? c.cta_label.trim() : null,

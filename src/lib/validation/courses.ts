@@ -113,6 +113,16 @@ const httpsUrl = (message: string, pattern: RegExp) =>
     .refine((v) => v === "" || (pattern.test(v) && URL.canParse(v)), message)
     .transform((v) => (v === "" ? null : v));
 
+/** Built-in covers shipped with the site (public/covers). */
+export const LOCAL_COVER_PATTERN = /^\/covers\/[A-Za-z0-9_-][A-Za-z0-9._-]*\.(svg|png|jpe?g|webp)$/;
+
+/** A course cover is a full https link or one of the site's own /covers/... images. */
+export function isCoverImageUrl(v: unknown): v is string {
+  if (typeof v !== "string") return false;
+  if (LOCAL_COVER_PATTERN.test(v) && !v.includes("..")) return true;
+  return /^https:\/\/\S+$/i.test(v) && URL.canParse(v);
+}
+
 export const slugField = z
   .string()
   .trim()
@@ -203,7 +213,12 @@ export const courseSchema = z
     shortDescription: optionalText(300),
     description: optionalText(20000),
     whoIsItFor: optionalText(4000),
-    coverImageUrl: httpsUrl("Use a full image link starting with https://", /^https:\/\/\S+$/i),
+    coverImageUrl: z
+      .string()
+      .trim()
+      .max(500, "Keep the link under 500 characters")
+      .refine((v) => v === "" || isCoverImageUrl(v), "Use a full image link starting with https:// or a built-in cover such as /covers/mcp.svg")
+      .transform((v) => (v === "" ? null : v)),
     instructorName: optionalText(120),
     level: optionalText(40),
     prerequisites: optionalText(4000),

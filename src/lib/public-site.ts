@@ -1,5 +1,5 @@
 // Shared (client-safe) types and helpers for the public website settings.
-import type { RegistrationMode } from "@/lib/validation/courses";
+import { isCoverImageUrl, type RegistrationMode } from "@/lib/validation/courses";
 
 export type PublicSocialLinks = {
   linkedin: string | null;
@@ -93,7 +93,7 @@ export function parsePublicSite(data: unknown): PublicSite {
             slug: fc.slug,
             title: fc.title,
             short_description: text(fc.short_description),
-            cover_image_url: httpsLink(fc.cover_image_url),
+            cover_image_url: isCoverImageUrl(fc.cover_image_url) ? fc.cover_image_url : null,
             duration_text: text(fc.duration_text),
             delivery_mode: typeof fc.delivery_mode === "string" ? fc.delivery_mode : "online",
             level: text(fc.level),

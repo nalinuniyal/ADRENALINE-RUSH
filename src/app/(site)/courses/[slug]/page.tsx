@@ -78,7 +78,11 @@ async function CourseDetail({ params }: { params: PageProps<"/courses/[slug]">["
               ) : null}
             </div>
           </div>
-          <div className="ar-glass animate-scale-in self-start rounded-2xl p-6 [animation-delay:200ms]">
+          <div className="ar-glass animate-scale-in self-start overflow-hidden rounded-2xl p-6 [animation-delay:200ms]">
+            {course.cover_image_url ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={course.cover_image_url} alt="" className="-mx-6 -mt-6 mb-6 aspect-[16/9] w-[calc(100%+3rem)] max-w-none object-cover" />
+            ) : null}
             <p className="text-sm text-white/60">Course fee</p>
             <PriceTag course={course} className="mt-1 block text-3xl" />
             <dl className="mt-6 grid grid-cols-2 gap-4">

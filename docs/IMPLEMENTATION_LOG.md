@@ -366,6 +366,17 @@ Known limits: a finance-only role sees empty fee lists unless it can also see ca
 the Accounts template includes "See every candidate"); batch/class scope comes from the base role, not a
 separate choice.
 
+## Stage 4.1 — Full HTML & CSS and Marketing Cloud Next courses, built-in covers (2026-10-15) ✅
+
+- `supabase/starter/html-css-and-mc-next.sql`: upserts `html-css` and `marketing-cloud-next` by slug (14 modules /
+  59 lessons each, with durations), keeps status, prices and registrations of existing courses, sets MCP's cover if empty.
+- Migration `20261014000015_course_cover_paths.sql`: `cover_image_url` may also be a site path `/covers/<file>.(svg|png|jpg|jpeg|webp)`.
+- `public/covers/{mcp,html-css,marketing-cloud-next}.svg`; the course page now shows the cover above the fee card.
+- Validation (`isCoverImageUrl`) shared by the admin form and the public readers; db tests for the check and the script.
+- Verified: unit 448, db 229, build, full-flow e2e (10) and the pages in Chromium with the covers loading.
+- Marketing Cloud Next content follows Salesforce's public positioning at the time of writing; review it against the
+  current release notes before each batch.
+
 ## Remaining tasks / known limitations
 
 - Password reset / change-password flow (needs Supabase email or a custom SMTP; planned with Phase 8,

@@ -186,7 +186,7 @@ export function CourseForm({
             </Select>
           </Field>
           {text("shortDescription", "Short description", { multiline: 2, maxLength: 300, hint: "Up to 300 characters. Shown on course cards.", className: "sm:col-span-2" })}
-          {text("coverImageUrl", "Cover image URL", { type: "url", placeholder: "https://", hint: "Optional. Must start with https://", className: "sm:col-span-2" })}
+          {text("coverImageUrl", "Cover image URL", { placeholder: "https:// or /covers/html-css.svg", hint: "Optional. A full https:// image link, or a built-in cover: /covers/mcp.svg, /covers/html-css.svg, /covers/marketing-cloud-next.svg", className: "sm:col-span-2" })}
         </Section>
 
         <Section title="Course content" description="The main sections of the public course page.">
