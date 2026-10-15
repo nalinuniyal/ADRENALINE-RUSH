@@ -113,6 +113,43 @@ export function whatsappLink(number: string | null | undefined, message?: string
   return `https://wa.me/${digits}${message ? `?text=${encodeURIComponent(message)}` : ""}`;
 }
 
+export type WhatsappNumber = { ok: true; digits: string } | { ok: false; reason: string };
+
+/**
+ * International digits for WhatsApp click-to-chat. Numbers written with + or 00
+ * keep their country code; local numbers ("98765 43210", "098765 43210") get
+ * the default country code (e.g. "91"). wa.me needs 8–15 digits, no +.
+ */
+export function normalizeWhatsappNumber(phone: string | null | undefined, defaultCountryCode = "91"): WhatsappNumber {
+  const raw = (phone ?? "").trim();
+  if (!raw) return { ok: false, reason: "No phone number saved for this candidate." };
+  if (/[a-z]/i.test(raw.replace(/\b(ext|x)\.?\s*\d+$/i, ""))) return { ok: false, reason: "The phone number contains letters." };
+  const cc = /^[1-9]\d{0,3}$/.test(defaultCountryCode) ? defaultCountryCode : "";
+  const main = raw.replace(/\s*(ext|x)\.?\s*\d+$/i, "");
+  let digits = main.replace(/\D/g, "");
+  if (main.startsWith("+")) {
+    // Already international.
+  } else if (digits.startsWith("00")) {
+    digits = digits.slice(2);
+  } else if (cc && digits.length <= 11) {
+    // Local number: drop a trunk 0 and add the default country code.
+    digits = `${cc}${digits.replace(/^0+/, "")}`;
+  }
+  if (digits.length < 8 || digits.length > 15 || digits.startsWith("0")) return { ok: false, reason: "The phone number does not look like a valid international number." };
+  return { ok: true, digits };
+}
+
+/** wa.me click-to-chat link for a candidate's phone, using the default country code for local numbers. */
+export function whatsappChatLink(
+  phone: string | null | undefined,
+  message: string,
+  defaultCountryCode = "91",
+): { ok: true; url: string; digits: string } | { ok: false; reason: string } {
+  const n = normalizeWhatsappNumber(phone, defaultCountryCode);
+  if (!n.ok) return n;
+  return { ok: true, digits: n.digits, url: whatsappLink(n.digits, message) as string };
+}
+
 /** tel: link keeping a leading + and digits only, or null. */
 export function telLink(phone: string | null | undefined): string | null {
   const p = (phone ?? "").trim();

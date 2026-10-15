@@ -30,6 +30,7 @@ export const PERMISSIONS = [
   "reports.export",
   "settings.manage",
   "members.manage",
+  "roles.manage",
   "integrations.manage",
   "audit.view",
 ] as const;
@@ -93,7 +94,7 @@ export const NAV_ITEMS: readonly NavItem[] = [
     href: "/admin/settings",
     label: "Settings",
     icon: "settings",
-    requires: ["settings.manage", "members.manage", "integrations.manage"],
+    requires: ["settings.manage", "members.manage", "roles.manage", "integrations.manage"],
     phase: 1,
   },
 ];
@@ -112,3 +113,8 @@ export const ROLE_LABELS: Record<MemberRole, string> = {
   staff: "Staff / Counselor",
   instructor: "Instructor",
 };
+
+/** "Accounts" for a member with a custom role, otherwise the built-in label. */
+export function roleLabel(role: MemberRole, customRoleName?: string | null): string {
+  return customRoleName?.trim() || ROLE_LABELS[role];
+}

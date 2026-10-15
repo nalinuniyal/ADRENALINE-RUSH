@@ -10,6 +10,8 @@ import { RegistrationForm } from "@/components/public/registration-form";
 import { Alert } from "@/components/ui/alert";
 import { buttonVariants } from "@/components/ui/button";
 import { getPublicCourse, getPublicForm } from "@/lib/data/public-courses";
+import { getPublicPaymentDetails } from "@/lib/data/public-payment";
+import { PaymentDetailsPanel } from "@/components/public/payment-details";
 import { courseCtaLabel } from "@/lib/public-site";
 import { deliveryLabel, formatDate } from "@/lib/format";
 
@@ -37,7 +39,7 @@ export default function CoursePage({ params }: PageProps<"/courses/[slug]">) {
 
 async function CourseDetail({ params }: { params: PageProps<"/courses/[slug]">["params"] }) {
   const { slug } = await params;
-  const [course, form] = await Promise.all([getPublicCourse(slug), getPublicForm(slug)]);
+  const [course, form, payment] = await Promise.all([getPublicCourse(slug), getPublicForm(slug), getPublicPaymentDetails()]);
   if (!course) notFound();
 
   const facts = [
@@ -185,6 +187,14 @@ async function CourseDetail({ params }: { params: PageProps<"/courses/[slug]">["
                   </details>
                 ))}
               </div>
+            </Reveal>
+          ) : null}
+
+          {payment ? (
+            <Reveal as="section">
+              <h2 className="font-display text-2xl font-bold text-ink-900">Ways to pay</h2>
+              <p className="mt-2 mb-5 text-sm text-[#444]">Pay the fee directly to us by UPI or bank transfer once your seat is confirmed. Keep the transaction reference (UTR).</p>
+              <PaymentDetailsPanel details={payment} amountPaise={null} currency={course.currency} note={course.title} />
             </Reveal>
           ) : null}
         </div>

@@ -28,7 +28,7 @@ export function toRenderable(t: Omit<TemplateRow, "id" | "audience">): Renderabl
 
 export type DeliveryLog = {
   organizationId: string;
-  kind: "automation" | "test";
+  kind: "automation" | "test" | "share" | "fee_reminder" | "payment_confirmation";
   automationId?: string | null;
   templateId?: string | null;
   candidateId?: string | null;

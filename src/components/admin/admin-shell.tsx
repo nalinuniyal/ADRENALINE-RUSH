@@ -1,11 +1,11 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
-import { LogOut, Search, Settings } from "lucide-react";
+import { LogOut, Search, Settings, UserRound } from "lucide-react";
 import { signOut } from "@/app/actions/auth";
 import { Logo } from "@/components/brand/logo";
 import { AppLauncher, AppNavTabs } from "@/components/admin/sidebar-nav";
 import { requireAccess } from "@/lib/auth/session";
-import { ROLE_LABELS, visibleNav } from "@/lib/auth/permissions";
+import { roleLabel, visibleNav } from "@/lib/auth/permissions";
 
 function initials(email: string) {
   const name = email.split("@")[0] ?? "";
@@ -65,9 +65,12 @@ export async function AdminShell({ children }: { children: ReactNode }) {
                 <div className="px-2 py-2">
                   <p className="truncate text-sm font-semibold">{access.email}</p>
                   <p className="text-xs text-muted">
-                    {ROLE_LABELS[access.role]} · {access.organization.name}
+                    {roleLabel(access.role, access.customRole?.name)} · {access.organization.name}
                   </p>
                 </div>
+                <Link href="/admin/account" className="flex w-full items-center gap-2 rounded-md px-2 py-2 text-left text-sm hover:bg-canvas">
+                  <UserRound className="size-4" aria-hidden /> My account
+                </Link>
                 <form action={signOut}>
                   <button type="submit" className="flex w-full items-center gap-2 rounded-md px-2 py-2 text-left text-sm hover:bg-canvas" aria-label="Sign out">
                     <LogOut className="size-4" aria-hidden /> Log out

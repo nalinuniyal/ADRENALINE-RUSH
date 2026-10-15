@@ -176,7 +176,8 @@ test("owner works the lead in the CRM", async ({ page }) => {
 
   await page.getByLabel("Add a note").fill("Called, interested in the weekend batch.");
   await page.getByRole("button", { name: /add note/i }).click();
-  await expect(page.getByText("Called, interested in the weekend batch.")).toBeVisible();
+  // Shown in the Notes card and on the activity timeline.
+  await expect(page.getByText("Called, interested in the weekend batch.").first()).toBeVisible();
 
   await page.getByLabel("What needs to happen?").fill("Send fee details");
   await page.getByRole("button", { name: "Schedule follow-up" }).click();

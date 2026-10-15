@@ -1,14 +1,20 @@
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { hasAny, NAV_ITEMS, PERMISSIONS, visibleNav } from "./permissions";
 
 describe("permission catalog", () => {
-  it("matches the keys seeded by the database migration", () => {
-    const sql = readFileSync(path.resolve(__dirname, "../../../supabase/migrations/20261014000001_foundation.sql"), "utf8");
-    const block = sql.slice(sql.indexOf("insert into public.permissions"), sql.indexOf("-- Owner implicitly"));
-    const keys = [...block.matchAll(/\('([a-z_]+\.[a-z_]+)'/g)].map((m) => m[1]).sort();
-    expect(keys).toEqual([...PERMISSIONS].sort());
+  it("matches the keys seeded by the database migrations", () => {
+    const dir = path.resolve(__dirname, "../../../supabase/migrations");
+    const keys: string[] = [];
+    for (const file of readdirSync(dir).filter((f) => f.endsWith(".sql")).sort()) {
+      const sql = readFileSync(path.join(dir, file), "utf8");
+      for (const block of sql.split("insert into public.permissions (key, description) values").slice(1)) {
+        const values = block.slice(0, block.indexOf(";"));
+        keys.push(...[...values.matchAll(/\('([a-z_]+\.[a-z_]+)'/g)].map((m) => m[1]));
+      }
+    }
+    expect(keys.sort()).toEqual([...PERMISSIONS].sort());
   });
 
   it("only references known permissions in navigation", () => {

@@ -19,6 +19,12 @@ export const EMAIL_VARIABLES: readonly VariableDef[] = [
   { name: "candidate_phone", label: "Candidate's phone", example: "+91 98765 43210" },
   { name: "registration_answers", label: "Everything the candidate filled in (team emails only)", example: "City: Pune\nCurrent company: Example Ltd\nTotal experience (years): 4", teamOnly: true },
   { name: "candidate_admin_url", label: "Link to the candidate in the dashboard (team emails only)", example: "https://example.com/admin/candidates/…", teamOnly: true },
+  // Filled only for the team invitation email (Settings → Team).
+  { name: "invitee_name", label: "Invited person's name (team invitation only)", example: "Rahul", teamOnly: true },
+  { name: "invite_role", label: "Role they are invited as (team invitation only)", example: "Staff / Counselor", teamOnly: true },
+  { name: "inviter_name", label: "Who sent the invitation (team invitation only)", example: "Asha", teamOnly: true },
+  { name: "invite_url", label: "Accept-invitation link (team invitation only)", example: "https://example.com/invite/…", teamOnly: true },
+  { name: "invite_expires", label: "When the invitation link expires (team invitation only)", example: "22 Oct 2026", teamOnly: true },
 ];
 
 export type EmailVariables = Record<string, string>;

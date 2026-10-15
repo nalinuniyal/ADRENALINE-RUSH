@@ -18,10 +18,12 @@ import {
   StickyNote,
   UserPlus,
   UserRound,
+  Wallet,
 } from "lucide-react";
 import { AccessDenied } from "@/components/admin/access-denied";
 import { PageHeader } from "@/components/admin/page-header";
 import { Badge } from "@/components/ui/badge";
+import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { IconTile } from "@/components/ui/icon-tile";
 import { requireAccess } from "@/lib/auth/session";
@@ -30,6 +32,8 @@ import { formatDate, formatDateTime, utcToZonedParts } from "@/lib/format";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { cn } from "@/lib/utils";
 import type { CandidateFormValues } from "../_components/candidate-form";
+import { CandidateFeesCard } from "../../finance/_components/candidate-fees-card";
+import { CandidateEnrollments } from "../_components/candidate-enrollments";
 import { EditableDetails, FollowUpForm, NoteForm, OwnerSelect, StatusPath, TaskActions } from "../_components/profile-actions";
 import { personName, StatusBadge } from "../_components/status-badge";
 
@@ -56,6 +60,7 @@ const ACTIVITY_ICONS: Record<string, LucideIcon> = {
   created: UserPlus,
   owner_changed: UserRound,
   resource_shared: Share2,
+  fee_reminder: Wallet,
 };
 
 async function CandidateProfile({ params }: { params: PageProps<"/admin/candidates/[id]">["params"] }) {
@@ -175,7 +180,12 @@ async function CandidateProfile({ params }: { params: PageProps<"/admin/candidat
         title={c.full_name}
         description={[c.job_title, c.company].filter(Boolean).join(" at ") || undefined}
         actions={
-          <div className="flex flex-wrap gap-1.5">
+          <div className="flex flex-wrap items-center gap-1.5">
+            {access.permissions.includes("resources.share") ? (
+              <Link href={`/admin/resources/share?candidate=${c.id}`} className={buttonVariants({ size: "sm" })}>
+                <Share2 className="size-4" aria-hidden /> Share demo/resources
+              </Link>
+            ) : null}
             <StatusBadge status={status} />
             {c.do_not_contact ? <Badge tone="danger">Do not contact</Badge> : null}
             {c.marketing_consent && !c.do_not_contact ? <Badge tone="success">Marketing opt-in</Badge> : null}
@@ -215,6 +225,16 @@ async function CandidateProfile({ params }: { params: PageProps<"/admin/candidat
               </EditableDetails>
             </CardContent>
           </Card>
+
+          <Suspense fallback={<div className="ar-skeleton h-32 rounded-[var(--radius-card)]" />}>
+            <CandidateEnrollments candidateId={c.id} access={access} />
+          </Suspense>
+
+          {access.permissions.includes("finance.view") ? (
+            <Suspense fallback={<div className="ar-skeleton h-24 rounded-[var(--radius-card)]" />}>
+              <CandidateFeesCard candidateId={c.id} access={access} />
+            </Suspense>
+          ) : null}
 
           <Card>
             <CardHeader icon={<IconTile icon={BookOpen} color="violet" size="sm" />}>

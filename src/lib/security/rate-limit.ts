@@ -1,5 +1,6 @@
 import "server-only";
 import { headers } from "next/headers";
+import { connection } from "next/server";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { serverEnv } from "@/lib/env.server";
 import { hashKey } from "@/lib/security/tokens";
@@ -31,6 +32,8 @@ export async function checkRateLimit(rule: RateLimitRule, identifier: string): P
   // RATE_LIMIT_SALT is optional: without it the server secret doubles as the
   // salt (it is hashed into the key, never stored), so stored keys still
   // cannot be reversed into IP or email addresses.
+  // Only meaningful for a real request: never count hits during a prerender.
+  await connection();
   const env = serverEnv();
   const salt = env.RATE_LIMIT_SALT ?? env.SUPABASE_SECRET_KEY;
   try {
@@ -40,7 +43,7 @@ export async function checkRateLimit(rule: RateLimitRule, identifier: string): P
       p_window_seconds: rule.windowSeconds,
     });
     if (error) {
-      console.error(JSON.stringify({ level: "error", msg: "rate limit check failed", code: error.code }));
+      console.error(JSON.stringify({ level: "error", msg: "rate limit check failed", code: error.code, detail: error.message?.slice(0, 160) }));
       return "unavailable";
     }
     return data === true ? "ok" : "limited";

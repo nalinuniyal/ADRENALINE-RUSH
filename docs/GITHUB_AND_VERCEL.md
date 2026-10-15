@@ -82,6 +82,11 @@ values from your `.env.local`; the URL must be just `https://<ref>.supabase.co`.
 | `SMTP_USER` | your Gmail address | For emails |
 | `SMTP_PASSWORD` | the 16-character Gmail app password (mark **Sensitive**) | For emails |
 | `EMAIL_FROM` | `Adrenaline Rush <your Gmail address>` | For emails |
+| `GOOGLE_CLIENT_ID` | from Google Cloud (see SETUP_GUIDE "Connect Google Calendar & Meet") | For Meet links |
+| `GOOGLE_CLIENT_SECRET` | from Google Cloud (mark **Sensitive**) | For Meet links |
+| `RAZORPAY_KEY_ID` | `rzp_test_...` from Razorpay → Account & Settings → API Keys | For online payments |
+| `RAZORPAY_KEY_SECRET` | from the same screen (mark **Sensitive**) | For online payments |
+| `RAZORPAY_WEBHOOK_SECRET` | the secret you type when adding the webhook (mark **Sensitive**) | For online payments |
 | `ADMIN_SETUP_TOKEN` | leave out (you already created your login) | No |
 
 Never add `NEXT_PUBLIC_` in front of the secret key, salt or SMTP password.

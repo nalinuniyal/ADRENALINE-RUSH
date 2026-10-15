@@ -75,7 +75,7 @@ export function OrganizationSettingsForm({ initial }: { initial: FormInput }) {
         {text("contactEmail", "Contact email", { type: "email" })}
         {text("contactPhone", "Contact phone", { type: "tel", placeholder: "+91 98765 43210" })}
         {text("websiteUrl", "Website", { type: "url", placeholder: "https://" })}
-        {text("logoUrl", "Logo URL", { type: "url", hint: "Optional. Upload support arrives with the resource library." })}
+        {text("logoUrl", "Logo URL", { type: "url", hint: "Optional. A direct https:// link to your logo image." })}
         <Field id="timezone" label="Time zone" error={errors.timezone?.message} hint="Sessions and reports use this time zone.">
           <Select id="timezone" {...register("timezone")} aria-describedby="timezone-hint">
             {timezones.map((tz) => (

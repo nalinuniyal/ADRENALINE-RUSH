@@ -125,7 +125,7 @@ async function EmailLog({ searchParams }: { searchParams: PageProps<"/admin/mark
                         </>
                       ) : null}
                       {" · "}
-                      {r.kind === "test" ? "Test email" : (r.automationName ?? "Automation (deleted)")}
+                      {r.kind === "test" ? "Test email" : r.kind === "share" ? "Shared resources" : r.kind === "fee_reminder" ? "Fee reminder" : (r.automationName ?? "Automation (deleted)")}
                       {r.provider ? ` · via ${r.provider === "smtp" ? "SMTP" : "Resend"}` : ""}
                     </p>
                     {r.error ? <p className="mt-1 text-xs break-words text-danger-700">{r.error}</p> : null}

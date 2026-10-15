@@ -50,6 +50,7 @@ describe("email defaults", () => {
     expect(templates).toEqual([
       { key: "demo_booking_team", audience: "team" },
       { key: "demo_confirmation_candidate", audience: "candidate" },
+      { key: "team_invitation", audience: "team" }, // seeded by the team invitations migration
     ]);
     const { rows: autos } = await db.query(
       "select a.recipient, a.channel, a.course_id, a.is_active, t.key from public.email_automations a join public.email_templates t on t.id = a.template_id where a.organization_id = $1 order by a.recipient",

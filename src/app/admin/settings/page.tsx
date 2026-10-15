@@ -6,18 +6,23 @@ import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { requireAccess } from "@/lib/auth/session";
-import { ROLE_LABELS, type MemberRole } from "@/lib/auth/permissions";
+import { roleLabel, type MemberRole } from "@/lib/auth/permissions";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { PaymentGatewayRow } from "../finance/_components/payment-gateway-row";
+import { WhatsappIntegrationRow } from "../resources/_components/whatsapp-integration";
 import { CredentialsForm } from "./credentials-form";
+import { GoogleIntegrationRow } from "./google-integration";
 import { LeadStatusesCard } from "./lead-statuses";
 import { OrganizationSettingsForm } from "./organization-form";
 import { ProfileForm } from "./profile-form";
 
 export const metadata: Metadata = { title: "Settings" };
 
-export default async function SettingsPage() {
-  const { access, denied } = await requireAccess(["settings.manage", "members.manage", "integrations.manage"]);
+export default async function SettingsPage({ searchParams }: PageProps<"/admin/settings">) {
+  const { access, denied } = await requireAccess(["settings.manage", "members.manage", "roles.manage", "integrations.manage"]);
   if (denied) return <AccessDenied />;
+  const googleParam = (await searchParams).google;
+  const googleCallback = typeof googleParam === "string" ? googleParam : undefined;
 
   const supabase = await createSupabaseServerClient();
   const [orgRes, membersRes, profileRes] = await Promise.all([
@@ -30,7 +35,7 @@ export default async function SettingsPage() {
       .single(),
     supabase
       .from("organization_memberships")
-      .select("id, role, status, created_at, user_profiles(full_name, email)")
+      .select("id, user_id, role, status, created_at, user_profiles(full_name, email), custom_roles(name)")
       .eq("organization_id", access.organization.id)
       .order("created_at"),
     supabase.from("user_profiles").select("full_name").eq("id", access.userId).single(),
@@ -45,10 +50,10 @@ export default async function SettingsPage() {
       <PageHeader title="Settings" description="Business profile, team access and integrations." />
       <div className="grid gap-6">
         {canManageSettings ? (
-          <Card>
+          <Card id="business-profile">
             <CardHeader>
               <CardTitle>Business profile</CardTitle>
-              <CardDescription>Used across the dashboard and, from Phase 2, on your public pages.</CardDescription>
+              <CardDescription>Used across the dashboard, your public pages and emails.</CardDescription>
             </CardHeader>
             <CardContent>
               <OrganizationSettingsForm
@@ -82,6 +87,20 @@ export default async function SettingsPage() {
           </Card>
         ) : null}
 
+        {canManageSettings || access.permissions.includes("finance.manage") ? (
+          <Card id="payment-details">
+            <CardHeader>
+              <CardTitle>Payment details</CardTitle>
+              <CardDescription>Your UPI ID and bank account for students to pay you directly (free, you confirm each payment).</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Link href="/admin/settings/payments" className={buttonVariants({ variant: "secondary" })}>
+                Edit payment details
+              </Link>
+            </CardContent>
+          </Card>
+        ) : null}
+
         {canManageSettings ? <LeadStatusesCard organizationId={access.organization.id} /> : null}
 
         <Card>
@@ -104,45 +123,49 @@ export default async function SettingsPage() {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Team</CardTitle>
-            <CardDescription>
-              Staff and instructor invitations are added in a later phase. The switches in Business profile decide
-              whether those roles can sign in at all.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="overflow-x-auto p-0">
-            <table className="w-full min-w-[480px] text-left text-sm">
-              <thead className="border-b border-line text-xs text-muted uppercase">
-                <tr>
-                  <th scope="col" className="px-5 py-3 font-medium">Name</th>
-                  <th scope="col" className="px-5 py-3 font-medium">Role</th>
-                  <th scope="col" className="px-5 py-3 font-medium">Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {(membersRes.data ?? []).map((m) => {
-                  const profile = Array.isArray(m.user_profiles) ? m.user_profiles[0] : m.user_profiles;
-                  return (
-                    <tr key={m.id} className="border-b border-line last:border-0">
-                      <td className="px-5 py-3">
-                        <p className="font-medium">{profile?.full_name || "—"}</p>
-                        <p className="text-xs text-muted">{profile?.email}</p>
-                      </td>
-                      <td className="px-5 py-3">{ROLE_LABELS[m.role as MemberRole]}</td>
-                      <td className="px-5 py-3">
-                        <Badge tone={m.status === "active" ? "success" : "neutral"}>{m.status}</Badge>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </CardContent>
-        </Card>
+        {access.permissions.includes("members.manage") ? (
+          <Card>
+            <CardHeader>
+              <CardTitle>Team</CardTitle>
+              <CardDescription>
+                {(membersRes.data ?? []).filter((m) => m.status === "active").length} active member(s). Invite administrators, staff and
+                instructors, change roles and switch access off. The switches in Business profile decide whether staff and instructors can
+                sign in at all.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="flex flex-wrap gap-2">
+              {(membersRes.data ?? []).map((m) => {
+                const profile = Array.isArray(m.user_profiles) ? m.user_profiles[0] : m.user_profiles;
+                return (
+                  <Badge key={m.id} tone={m.status === "active" ? "neutral" : "warning"}>
+                    {profile?.full_name || profile?.email} · {roleLabel(m.role as MemberRole, (Array.isArray(m.custom_roles) ? m.custom_roles[0] : m.custom_roles)?.name)}
+                  </Badge>
+                );
+              })}
+              <Link href="/admin/settings/team" className={buttonVariants({ variant: "secondary", size: "sm" }) + " basis-full sm:basis-auto"}>
+                Manage team
+              </Link>
+            </CardContent>
+          </Card>
+        ) : null}
 
-        <Card>
+        {access.permissions.includes("roles.manage") ? (
+          <Card id="roles">
+            <CardHeader>
+              <CardTitle>Roles &amp; access</CardTitle>
+              <CardDescription>
+                Choose what administrators, staff and instructors can see and do, and create your own roles such as “Accounts” or “Senior instructor”.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Link href="/admin/settings/roles" className={buttonVariants({ variant: "secondary" })}>
+                Manage roles &amp; access
+              </Link>
+            </CardContent>
+          </Card>
+        ) : null}
+
+        <Card id="integrations">
           <CardHeader>
             <CardTitle>Integrations</CardTitle>
             <CardDescription>Optional. Every workflow has a manual fallback.</CardDescription>
@@ -156,16 +179,20 @@ export default async function SettingsPage() {
                   Email settings
                 </Link>
               </li>
-              {[
-                { name: "Google Calendar & Meet", phase: 5 },
-                { name: "WhatsApp Business API", phase: 8 },
-                { name: "Payment gateway", phase: 9 },
-              ].map((i) => (
-                <li key={i.name} className="flex items-center justify-between py-3">
-                  <span>{i.name}</span>
-                  <Badge>Not connected · Phase {i.phase}</Badge>
-                </li>
-              ))}
+              <WhatsappIntegrationRow access={access} />
+              <GoogleIntegrationRow
+                supabase={supabase}
+                orgId={access.organization.id}
+                canManage={access.permissions.includes("integrations.manage")}
+                callback={googleCallback}
+                memberName={(id) => {
+                  const m = (membersRes.data ?? []).find((x) => x.user_id === id);
+                  const p = m ? (Array.isArray(m.user_profiles) ? m.user_profiles[0] : m.user_profiles) : null;
+                  return p?.full_name || p?.email || "a team member";
+                }}
+                timeZone={access.organization.timezone}
+              />
+              <PaymentGatewayRow />
             </ul>
           </CardContent>
         </Card>

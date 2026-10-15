@@ -1,4 +1,5 @@
-import type { Metadata } from "next";
+import type { Metadata, Route } from "next";
+import { redirect } from "next/navigation";
 import Link from "next/link";
 import { Suspense } from "react";
 import { AlarmClock, ArrowRight, BookOpen, CheckCircle2, Circle, ClipboardList, LayoutDashboard, UserPlus, Users } from "lucide-react";
@@ -10,14 +11,21 @@ import { IconTile, type IconTileColor } from "@/components/ui/icon-tile";
 import { requireAccess, type Access } from "@/lib/auth/session";
 import { NAV_ITEMS, hasAny } from "@/lib/auth/permissions";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { presetRange } from "@/lib/analytics/range";
+import { getKpis, getMoneyTotals } from "@/lib/data/analytics";
+import { buildTiles, KpiSkeleton, KpiTiles } from "./analytics/_components/kpi-tiles";
+import { UpcomingSessions } from "./_components/upcoming-sessions";
 
 export const metadata: Metadata = { title: "Dashboard" };
 
-const STAGE_READY = new Set(["/admin/courses", "/admin/candidates", "/admin/settings"]);
-
 export default async function DashboardPage() {
   const { access, denied } = await requireAccess(["dashboard.view"]);
-  if (denied) return <AccessDenied />;
+  if (denied) {
+    // Roles without the dashboard (e.g. a custom "Accounts" role) land on their first module.
+    const first = NAV_ITEMS.find((m) => m.href !== "/admin" && hasAny(access.permissions, m.requires));
+    if (first) redirect(first.href as Route);
+    return <AccessDenied />;
+  }
 
   const modules = NAV_ITEMS.filter((m) => m.href !== "/admin" && hasAny(access.permissions, m.requires));
 
@@ -31,8 +39,18 @@ export default async function DashboardPage() {
         description={`Live numbers from your database · times shown in ${access.organization.timezone}`}
       />
 
-      <Suspense fallback={<KpiSkeleton />}>
+      <Suspense fallback={<TopKpiSkeleton />}>
         <Kpis access={access} />
+      </Suspense>
+
+      {hasAny(access.permissions, ["reports.view", "candidates.view_all", "candidates.view_assigned"]) ? (
+        <Suspense fallback={<div className="mt-4"><KpiSkeleton /></div>}>
+          <ThisMonth access={access} />
+        </Suspense>
+      ) : null}
+
+      <Suspense fallback={<div className="ar-skeleton mt-4 h-40 rounded-[var(--radius-card)]" />}>
+        <UpcomingSessions access={access} />
       </Suspense>
 
       <div className="mt-4 grid gap-4 lg:grid-cols-3">
@@ -54,7 +72,6 @@ export default async function DashboardPage() {
               >
                 <IconTile icon={NAV_ICONS[m.icon]} color={NAV_COLORS[m.icon]} size="sm" />
                 <span className="font-medium text-fg">{m.short ?? m.label}</span>
-                <span className="text-[11px] text-muted">{STAGE_READY.has(m.href) ? "Ready" : "Coming next"}</span>
               </Link>
             ))}
           </CardContent>
@@ -131,7 +148,37 @@ async function Kpis({ access }: { access: Access }) {
   );
 }
 
-function KpiSkeleton() {
+/** This month's headline numbers, from the same functions as Analytics (money only with finance.view). */
+async function ThisMonth({ access }: { access: Access }) {
+  const supabase = await createSupabaseServerClient();
+  const org = access.organization.id;
+  const range = presetRange("this_month", access.organization.timezone);
+  const canFinance = access.permissions.includes("finance.view");
+  let data;
+  try {
+    data = await Promise.all([getKpis(supabase, org, range), getMoneyTotals(supabase, org, range, canFinance)]);
+  } catch {
+    return <p className="mt-4 text-sm text-muted">This month&apos;s numbers could not be loaded. Refresh the page to try again.</p>;
+  }
+  const [kpis, money] = data;
+  return (
+    <section className="mt-4" aria-labelledby="this-month-heading">
+      <div className="mb-2 flex items-baseline justify-between gap-2">
+        <h2 id="this-month-heading" className="text-sm font-bold text-fg">
+          This month
+        </h2>
+        {access.permissions.includes("reports.view") ? (
+          <Link href="/admin/analytics" className="text-xs font-medium text-brand-700 hover:underline">
+            Open analytics
+          </Link>
+        ) : null}
+      </div>
+      <KpiTiles tiles={buildTiles(kpis, money, `?from=${range.from}&to=${range.to}`)} label="This month" />
+    </section>
+  );
+}
+
+function TopKpiSkeleton() {
   return (
     <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
       {Array.from({ length: 5 }, (_, i) => (

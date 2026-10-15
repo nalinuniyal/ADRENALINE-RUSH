@@ -15,7 +15,10 @@ export type Access = {
     currency: string;
   };
   membershipId: string;
+  /** Base role: decides data scope (instructors see only their batches) and sign-in switches. */
   role: MemberRole;
+  /** Set when the owner gave this member a custom role (Settings › Roles & access). */
+  customRole: { id: string; name: string } | null;
   permissions: string[];
 };
 
@@ -38,7 +41,7 @@ export const getAccess = cache(async (): Promise<AccessResult> => {
   const userId = claims.sub;
   const email = typeof claims.email === "string" ? claims.email : "";
 
-  const { data, error } = await supabase.rpc("get_my_access");
+  const { data, error } = await supabase.rpc("get_my_access_v2");
   if (error) {
     console.error(JSON.stringify({ level: "error", msg: "get_my_access failed", code: error.code }));
     throw new Error("Could not load your access. Please try again.");
@@ -60,6 +63,7 @@ export const getAccess = cache(async (): Promise<AccessResult> => {
       },
       membershipId: row.membership_id,
       role: row.role,
+      customRole: row.custom_role_id && row.custom_role_name ? { id: row.custom_role_id, name: row.custom_role_name } : null,
       permissions: row.permissions,
     },
   };

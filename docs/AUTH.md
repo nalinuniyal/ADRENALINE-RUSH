@@ -34,7 +34,16 @@ otherwise those members have no access at all.
 
 The full permission list is in `src/lib/auth/permissions.ts` and seeded in the first migration (a unit test
 keeps them in sync). The owner/admin can grant or revoke individual permissions per member through
-`membership_permission_overrides` (UI arrives with team invitations).
+`membership_permission_overrides` (Settings → Team → Permissions). Only the owner changes administrators'
+overrides, and nobody can grant a permission they do not hold.
+
+## Team invitations
+
+Owners/admins with `members.manage` invite people from Settings → Team. The link carries a 256-bit random
+token; only its sha256 is stored. Links are single-use, expire after 7 days, can be cancelled, and are
+rate limited on the public `/invite/[token]` page. Accepting creates a confirmed Supabase login (or, if the
+email already has one, requires its current password) and activates the membership in one database
+function that only the service role can call.
 
 ## Enforcement layers
 
